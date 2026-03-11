@@ -153,6 +153,13 @@ local function encode_path(path)
   return table.concat(parts, "/")
 end
 
+local function github_query(path)
+  if path:lower():match("%.md$") or path:lower():match("%.markdown$") then
+    return "?plain=1"
+  end
+  return ""
+end
+
 local function line_fragment(provider, first, last)
   if not first or not last then
     return ""
@@ -204,7 +211,13 @@ function M.permalink(first, last)
   local encoded_file = encode_path(file)
 
   if provider == "github" then
-    return ("%s/blob/%s/%s%s"):format(remote_base, commit, encoded_file, line_fragment(provider, first, last))
+    return ("%s/blob/%s/%s%s%s"):format(
+      remote_base,
+      commit,
+      encoded_file,
+      github_query(file),
+      line_fragment(provider, first, last)
+    )
   end
 
   return ("%s/-/blob/%s/%s%s"):format(remote_base, commit, encoded_file, line_fragment(provider, first, last))
